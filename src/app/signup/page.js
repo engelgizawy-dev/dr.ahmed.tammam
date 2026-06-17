@@ -4,6 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// 🚀 استيراد أدوات فايربيز المطلوبة للتشييك الصاروخي
+// جربنا المسار النسبي المباشر المضمون لـ Next.js للوصول لجذر الـ app أو الـ src
+import { db } from "../../firebase"; 
+import { collection, query, where, getDocs, or, addDoc } from "firebase/firestore";
+
 const EGYPT_GOVERNORATES = [
   "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة", 
   "الفيوم", "الغربية", "الإسماعيلية", "المنوفية", "المنيا", "القليوبية", 
@@ -45,7 +50,7 @@ export default function SignupPage() {
     setGeneralError("");
     setPasswordError("");
 
-    // التحققات الأساسية السريعة
+    // 1️⃣ التحققات الأساسية في الفرونت إند
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("عذراً، كلمات المرور التي أدخلتها غير متطابقة!");
       return;
@@ -58,20 +63,60 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      console.log("جاري الحفظ المحلي والتوجيه الفوري لصفحة الهوم الرئيسية...");
+      // 2️⃣ الاستعلام المركب الصاروخي (Compound Query) لمنع التكرار على السيرفر الحي
+      const usersRef = collection(db, "users");
+      
+      const duplicateCheckQuery = query(
+        usersRef,
+        or(
+          where("studentPhone", "==", formData.studentPhone),
+          where("fatherPhone", "==", formData.studentPhone),
+          where("motherPhone", "==", formData.studentPhone),
+          where("studentPhone", "==", formData.fatherPhone),
+          where("fatherPhone", "==", formData.fatherPhone),
+          where("motherPhone", "==", formData.fatherPhone),
+          where("studentPhone", "==", formData.motherPhone),
+          where("fatherPhone", "==", formData.motherPhone),
+          where("motherPhone", "==", formData.motherPhone)
+        )
+      );
 
-      // 💾 حفظ البيانات رباعياً بالكامل محلياً عشان الـ Profile يقدر يقرأها
+      const querySnapshot = await getDocs(duplicateCheckQuery);
+
+      // لو لقانا أي سجل متطابق في الفايربيز بنقفل الباب فوراً ونمنع الحساب
+      if (!querySnapshot.empty) {
+        setGeneralError("عذراً، أحد الأرقام المدخلة مسجل مسبقاً بحساب آخر في قاعدة بيانات المنصة الحية!");
+        setLoading(false);
+        return;
+      }
+
+      // 3️⃣ رفع البيانات للفايربيز الحي بشكل رسمي
+      await addDoc(usersRef, {
+        firstName: formData.firstName,
+        secondName: formData.secondName,
+        thirdName: formData.thirdName,
+        lastName: formData.lastName,
+        studentPhone: formData.studentPhone,
+        fatherPhone: formData.fatherPhone,
+        motherPhone: formData.motherPhone,
+        governorate: formData.governorate,
+        academicYear: formData.academicYear,
+        password: formData.password, // للحفظ الصريح بناءً على طلب الإدارة مسبقاً
+        createdAt: new Date().toISOString()
+      });
+
+      // 💾 حفظ نسخة محلياً للبروفايل السريع
       localStorage.setItem("temp_student_data", JSON.stringify(formData));
       
-      // 🍪 زرع كوكيز الجلسة فوراً عشان الـ Middleware يفتح الباب وميطردش الطالب
+      // 🍪 زرع كوكيز الجلسة فوراً عشان الـ Middleware يفتح الباب
       document.cookie = `user_session=${formData.studentPhone}; path=/; max-age=86400`; 
 
       // 🚀 طيران مباشر وفوري على الصفحة الرئيسية
       router.push("/home");
 
     } catch (err) {
-      console.error(err);
-      setGeneralError("حدث خطأ غير متوقع.");
+      console.error("حدث خطأ أثناء فحص البيانات والاتصال بـ Firebase:", err);
+      setGeneralError("حدث خطأ في الاتصال بقاعدة البيانات أو مسار ملف الإعدادات غير دقيق.");
     } finally {
       setLoading(false);
     }
@@ -94,8 +139,8 @@ export default function SignupPage() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
             </svg>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-white mb-2">إنشاء حساب طالب جديد</h2>
-          <p className="text-gray-400 text-xs md:text-sm">امْلأ البيانات التالية بدقة للانضمام إلى رفاق الدكتور أحمد تمام</p>
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-2">إنشاء حساب طالب جديد (فايربيز الحي)</h2>
+          <p className="text-gray-400 text-xs md:text-sm">امْلأ البيانات بدقة لتفعيل الحساب على السيرفر المركزي فوراً</p>
         </div>
 
         {generalError && (
@@ -175,7 +220,7 @@ export default function SignupPage() {
           </div>
 
           <button type="submit" disabled={loading} className="w-full py-4 mt-4 rounded-xl text-sm font-black bg-[#C8D749] text-[#070B14] hover:bg-[#b5c43d] transition-all duration-300 shadow-[0_0_30px_rgba(200,215,73,0.15)] disabled:opacity-50">
-            {loading ? "جاري تهيئة الجلسة..." : "تسجيل وإنشاء الحساب عـلـى المنصة"}
+            {loading ? "جاري فحص الأرقام بالحسابات الحية..." : "تسجيل وحفظ الحساب على السيرفر الرئيسي"}
           </button>
         </form>
 
