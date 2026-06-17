@@ -3,9 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-// استيراد أدوات فايربيز المطلوبة للتشييك الصاروخي
-import { db } from "@/firebase"; 
-import { collection, query, where, getDocs, or } from "firebase/firestore";
 
 const EGYPT_GOVERNORATES = [
   "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة", 
@@ -48,7 +45,7 @@ export default function SignupPage() {
     setGeneralError("");
     setPasswordError("");
 
-    // 1️⃣ التحققات الأساسية في الفرونت إند
+    // التحققات الأساسية السريعة
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("عذراً، كلمات المرور التي أدخلتها غير متطابقة!");
       return;
@@ -61,37 +58,9 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // 2️⃣ الاستعلام المركب الصاروخي (Compound Query) لمنع التكرار بدون ثقل
-      const usersRef = collection(db, "users");
-      
-      const duplicateCheckQuery = query(
-        usersRef,
-        or(
-          where("studentPhone", "==", formData.studentPhone),
-          where("fatherPhone", "==", formData.studentPhone),
-          where("motherPhone", "==", formData.studentPhone),
-          where("studentPhone", "==", formData.fatherPhone),
-          where("fatherPhone", "==", formData.fatherPhone),
-          where("motherPhone", "==", formData.fatherPhone),
-          where("studentPhone", "==", formData.motherPhone),
-          where("fatherPhone", "==", formData.motherPhone),
-          where("motherPhone", "==", formData.motherPhone)
-        )
-      );
+      console.log("جاري الحفظ المحلي والتوجيه الفوري لصفحة الهوم الرئيسية...");
 
-      const querySnapshot = await getDocs(duplicateCheckQuery);
-
-      // لو لقانا أي سجل متطابق بنقفل الباب فوراً ونمنع الحساب الوهمي
-      if (!querySnapshot.empty) {
-        setGeneralError("عذراً، أحد الأرقام المدخلة (رقمك أو رقم أحد أولياء الأمور) مسجل مسبقاً بحساب آخر في المنصة!");
-        setLoading(false);
-        return;
-      }
-
-      // 3️⃣ لو الأرقام سليمة وفريدة.. بنكمل الحفظ والتوجيه
-      console.log("الأرقام سليمة وفريدة 100%.. جاري الحفظ والتوجيه الفوري...");
-
-      // 💾 حفظ البيانات رباعياً بالكامل محلياً عشان الـ Profile يقرأها
+      // 💾 حفظ البيانات رباعياً بالكامل محلياً عشان الـ Profile يقدر يقرأها
       localStorage.setItem("temp_student_data", JSON.stringify(formData));
       
       // 🍪 زرع كوكيز الجلسة فوراً عشان الـ Middleware يفتح الباب وميطردش الطالب
@@ -101,8 +70,8 @@ export default function SignupPage() {
       router.push("/home");
 
     } catch (err) {
-      console.error("حدث خطأ أثناء فحص البيانات والاتصال بـ Firebase:", err);
-      setGeneralError("حدث خطأ أثناء فحص البيانات المكررة. تأكد من إعدادات الـ API Key الخاص بك.");
+      console.error(err);
+      setGeneralError("حدث خطأ غير متوقع.");
     } finally {
       setLoading(false);
     }
@@ -111,13 +80,11 @@ export default function SignupPage() {
   return (
     <div dir="rtl" className="min-h-screen bg-[#070B14] text-gray-100 font-sans flex flex-col justify-center items-center p-6 relative overflow-x-hidden selection:bg-[#C8D749]/30">
       
-      {/* الدوائر المشعة للـ Glassmorphism البرستيج */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
         <div className="absolute top-[10%] right-[10%] w-72 h-72 bg-[#C8D749]/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-[10%] left-[10%] w-72 h-72 bg-[#0E5159]/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* الكارت الزجاجي المركزي المحمي */}
       <div className="w-full max-w-2xl bg-[#0D1524]/60 border border-white/5 backdrop-blur-md rounded-2xl p-8 md:p-10 shadow-[0_0_25px_rgba(200,215,73,0.05)] relative z-10 my-10">
         
         <div className="text-center mb-8">
@@ -132,14 +99,13 @@ export default function SignupPage() {
         </div>
 
         {generalError && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs md:text-sm font-bold flex items-center gap-2 animate-shake">
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs md:text-sm font-bold flex items-center gap-2">
             ⚠️ {generalError}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           
-          {/* حقول الاسم الرباعي */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">الاسم الأول</label>
@@ -159,13 +125,11 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* رقم الطالب */}
           <div>
             <label className="block text-xs font-bold text-gray-400 mb-2">رقم هاتف الطالب (واتساب)</label>
             <input type="tel" name="studentPhone" required pattern="[0-9]{11}" value={formData.studentPhone} onChange={handleChange} placeholder="مثال: 01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
           </div>
 
-          {/* أرقام أولياء الأمور */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">رقم هاتف ولي الأمر (الأب)</label>
@@ -177,7 +141,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* السنة والمحافظة */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">السنة الدراسية</label>
@@ -199,7 +162,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* الباسوردات */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">إنشاء كلمة المرور</label>
@@ -212,8 +174,8 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full py-4 mt-4 rounded-xl text-sm font-black bg-[#C8D749] text-[#070B14] hover:bg-[#b5c43d] hover:scale-[1.01] transition-all duration-300 shadow-[0_0_30px_rgba(200,215,73,0.15)] disabled:opacity-50">
-            {loading ? "جاري فحص وتأمين بيانات الأرقام بثوانٍ..." : "تسجيل وإنشاء الحساب عـلـى المنصة"}
+          <button type="submit" disabled={loading} className="w-full py-4 mt-4 rounded-xl text-sm font-black bg-[#C8D749] text-[#070B14] hover:bg-[#b5c43d] transition-all duration-300 shadow-[0_0_30px_rgba(200,215,73,0.15)] disabled:opacity-50">
+            {loading ? "جاري تهيئة الجلسة..." : "تسجيل وإنشاء الحساب عـلـى المنصة"}
           </button>
         </form>
 
