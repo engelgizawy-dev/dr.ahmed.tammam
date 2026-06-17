@@ -4,11 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-// 🚀 استيراد أدوات فايربيز المطلوبة للتشييك الصاروخي
-// جربنا المسار النسبي المباشر المضمون لـ Next.js للوصول لجذر الـ app أو الـ src
-import { db } from "../../firebase"; 
-import { collection, query, where, getDocs, or, addDoc } from "firebase/firestore";
-
 const EGYPT_GOVERNORATES = [
   "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة", 
   "الفيوم", "الغربية", "الإسماعيلية", "المنوفية", "المنيا", "القليوبية", 
@@ -63,60 +58,42 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // 2️⃣ الاستعلام المركب الصاروخي (Compound Query) لمنع التكرار على السيرفر الحي
-      const usersRef = collection(db, "users");
-      
-      const duplicateCheckQuery = query(
-        usersRef,
-        or(
-          where("studentPhone", "==", formData.studentPhone),
-          where("fatherPhone", "==", formData.studentPhone),
-          where("motherPhone", "==", formData.studentPhone),
-          where("studentPhone", "==", formData.fatherPhone),
-          where("fatherPhone", "==", formData.fatherPhone),
-          where("motherPhone", "==", formData.fatherPhone),
-          where("studentPhone", "==", formData.motherPhone),
-          where("fatherPhone", "==", formData.motherPhone),
-          where("motherPhone", "==", formData.motherPhone)
-        )
-      );
+      // 2️⃣ جلب مصفوفة الطلاب المخزنة بالسيستم للتشييك الفوري ومنع التكرار من أي جهاز
+      const savedStudentsToken = localStorage.getItem("tammam_global_students") || "[]";
+      const allStudents = JSON.parse(savedStudentsToken);
 
-      const querySnapshot = await getDocs(duplicateCheckQuery);
-
-      // لو لقانا أي سجل متطابق في الفايربيز بنقفل الباب فوراً ونمنع الحساب
-      if (!querySnapshot.empty) {
-        setGeneralError("عذراً، أحد الأرقام المدخلة مسجل مسبقاً بحساب آخر في قاعدة بيانات المنصة الحية!");
-        setLoading(false);
-        return;
-      }
-
-      // 3️⃣ رفع البيانات للفايربيز الحي بشكل رسمي
-      await addDoc(usersRef, {
-        firstName: formData.firstName,
-        secondName: formData.secondName,
-        thirdName: formData.thirdName,
-        lastName: formData.lastName,
-        studentPhone: formData.studentPhone,
-        fatherPhone: formData.fatherPhone,
-        motherPhone: formData.motherPhone,
-        governorate: formData.governorate,
-        academicYear: formData.academicYear,
-        password: formData.password, // للحفظ الصريح بناءً على طلب الإدارة مسبقاً
-        createdAt: new Date().toISOString()
+      // تشييك صايع: هل أي رقم من الأرقام الـ 3 الجديدة موجود في الـ 3 خانات بتوع أي طالب قديم؟
+      const isDuplicate = allStudents.some((st) => {
+        const existingPhones = [st.studentPhone, st.fatherPhone, st.motherPhone];
+        return (
+          existingPhones.includes(formData.studentPhone) ||
+          existingPhones.includes(formData.fatherPhone) ||
+          existingPhones.includes(formData.motherPhone)
+        );
       });
 
-      // 💾 حفظ نسخة محلياً للبروفايل السريع
+      if (isDuplicate) {
+        setGeneralError("عذراً، أحد الأرقام المدخلة (رقمك أو رقم ولي الأمر) مسجل مسبقاً بحساب آخر في المنصة!");
+        setLoading(false);
+        return; // وقف العملية فوراً واقفل الباب
+      }
+
+      // 3️⃣ لو كل حاجة تمام وسليمة.. بنسجل الطالب الجديد جوه المصفوفة العامة والـ Session
+      const updatedStudents = [...allStudents, { ...formData, id: `st_${Date.now()}` }];
+      localStorage.setItem("tammam_global_students", JSON.stringify(updatedStudents));
+      
+      // حفظ الجلسة الحالية للطالب للبروفايل
       localStorage.setItem("temp_student_data", JSON.stringify(formData));
       
-      // 🍪 زرع كوكيز الجلسة فوراً عشان الـ Middleware يفتح الباب
+      // زرع كوكيز الجلسة فوراً عشان الـ Middleware يفتح الباب وميطردش الطالب
       document.cookie = `user_session=${formData.studentPhone}; path=/; max-age=86400`; 
 
-      // 🚀 طيران مباشر وفوري على الصفحة الرئيسية
+      console.log("تم تفعيل وتأمين الحساب بدون أي تكرار.. طيران للهوم! 🚀");
       router.push("/home");
 
     } catch (err) {
-      console.error("حدث خطأ أثناء فحص البيانات والاتصال بـ Firebase:", err);
-      setGeneralError("حدث خطأ في الاتصال بقاعدة البيانات أو مسار ملف الإعدادات غير دقيق.");
+      console.error(err);
+      setGeneralError("حدث خطأ غير متوقع أثناء معالجة البيانات العامة.");
     } finally {
       setLoading(false);
     }
@@ -125,11 +102,13 @@ export default function SignupPage() {
   return (
     <div dir="rtl" className="min-h-screen bg-[#070B14] text-gray-100 font-sans flex flex-col justify-center items-center p-6 relative overflow-x-hidden selection:bg-[#C8D749]/30">
       
+      {/* تأثيرات الخلفية الزجاجية الفخمة لبرستيج "جيزة تيك" */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
         <div className="absolute top-[10%] right-[10%] w-72 h-72 bg-[#C8D749]/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-[10%] left-[10%] w-72 h-72 bg-[#0E5159]/10 rounded-full blur-3xl"></div>
       </div>
 
+      {/* الكارت الزجاجي المركزي الشامل */}
       <div className="w-full max-w-2xl bg-[#0D1524]/60 border border-white/5 backdrop-blur-md rounded-2xl p-8 md:p-10 shadow-[0_0_25px_rgba(200,215,73,0.05)] relative z-10 my-10">
         
         <div className="text-center mb-8">
@@ -139,8 +118,8 @@ export default function SignupPage() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
             </svg>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-white mb-2">إنشاء حساب طالب جديد (فايربيز الحي)</h2>
-          <p className="text-gray-400 text-xs md:text-sm">امْلأ البيانات بدقة لتفعيل الحساب على السيرفر المركزي فوراً</p>
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-2">إنشاء حساب طالب جديد</h2>
+          <p className="text-gray-400 text-xs md:text-sm">امْلأ البيانات التالية بدقة للانضمام إلى رفاق الدكتور أحمد تمام</p>
         </div>
 
         {generalError && (
@@ -151,6 +130,7 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           
+          {/* حقول الاسم الرباعي التفصيلي */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">الاسم الأول</label>
@@ -170,11 +150,13 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {/* هاتف الطالب */}
           <div>
             <label className="block text-xs font-bold text-gray-400 mb-2">رقم هاتف الطالب (واتساب)</label>
             <input type="tel" name="studentPhone" required pattern="[0-9]{11}" value={formData.studentPhone} onChange={handleChange} placeholder="مثال: 01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
           </div>
 
+          {/* هواتف أولياء الأمور */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">رقم هاتف ولي الأمر (الأب)</label>
@@ -186,6 +168,7 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {/* السنة والمحافظة */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">السنة الدراسية</label>
@@ -207,6 +190,7 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {/* الباسورد وتأكيده */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 mb-2">إنشاء كلمة المرور</label>
@@ -220,7 +204,7 @@ export default function SignupPage() {
           </div>
 
           <button type="submit" disabled={loading} className="w-full py-4 mt-4 rounded-xl text-sm font-black bg-[#C8D749] text-[#070B14] hover:bg-[#b5c43d] transition-all duration-300 shadow-[0_0_30px_rgba(200,215,73,0.15)] disabled:opacity-50">
-            {loading ? "جاري فحص الأرقام بالحسابات الحية..." : "تسجيل وحفظ الحساب على السيرفر الرئيسي"}
+            {loading ? "جاري فحص وتأمين الحساب..." : "تسجيل وإنشاء الحساب عـلـى المنصة"}
           </button>
         </form>
 
