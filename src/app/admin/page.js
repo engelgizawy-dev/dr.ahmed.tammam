@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from "react";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("overview"); // overview | courses | academic | tech | coupons
+  const [activeTab, setActiveTab] = useState("overview"); // overview | students | courses | academic | tech | coupons
 
   // --- States لإدارة البيانات (اللوجيك المحلي) ---
+  const [students, setStudents] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [studentFilter, setStudentFilter] = useState("all"); // all | active
   const [courses, setCourses] = useState([]);
   const [academicTickets, setAcademicTickets] = useState([]);
   const [techTickets, setTechTickets] = useState([]);
@@ -35,7 +38,44 @@ export default function AdminDashboard() {
     // 4. جلب أو تهيئة كروت الشحن
     const savedCoupons = localStorage.getItem("tammam_system_coupons") || "[]";
     setCoupons(JSON.parse(savedCoupons));
+
+    // 5. جلب الطلاب الذين أنشأوا حسابات وتوليد داتا تجريبية للبرستيج
+    const localData = localStorage.getItem("temp_student_data");
+    const sessionData = document.cookie.includes("user_session");
+    
+    const dummyStudents = [
+      {
+        firstName: "أحمد", secondName: "محمد", thirdName: "أحمد", lastName: "تمّام",
+        studentPhone: "01012345678", fatherPhone: "01122334455", motherPhone: "01233445566",
+        governorate: "الجيزة", academicYear: "الصف الثالث الثانوي", password: "password123",
+        lastLogin: "منذ دقيقتين"
+      },
+      {
+        firstName: "عبد العزيز", secondName: "خالد", thirdName: "عبد العزيز", lastName: "السيد",
+        studentPhone: "01099887766", fatherPhone: "01199887766", motherPhone: "01299887766",
+        governorate: "القاهرة", academicYear: "الصف الثالث الثانوي", password: "elgizawy_king",
+        lastLogin: "نشط الآن 🟢"
+      }
+    ];
+
+    if (localData) {
+      const parsedData = JSON.parse(localData);
+      setStudents([ { ...parsedData, lastLogin: sessionData ? "نشط الآن 🟢" : "منذ ساعات" }, ...dummyStudents ]);
+    } else {
+      setStudents(dummyStudents);
+    }
   }, []);
+
+  // فلترة الطلاب بناءً على البحث والتاب النشط
+  const filteredStudents = students.filter((student) => {
+    const fullName = `${student.firstName} ${student.secondName} ${student.thirdName} ${student.lastName}`;
+    const matchesSearch = fullName.includes(searchQuery) || student.studentPhone.includes(searchQuery);
+    
+    if (studentFilter === "active") {
+      return matchesSearch && student.lastLogin.includes("نشط الآن");
+    }
+    return matchesSearch;
+  });
 
   // 📝 1. دالة إضافة كورس جديد للمنصة
   const handleAddCourse = (e) => {
@@ -46,7 +86,7 @@ export default function AdminDashboard() {
       description: newCourse.description,
       price: Number(newCourse.price),
       lecturesCount: Number(newCourse.lecturesCount),
-      isLocked: true // ينزل مقفول للطبيعي لحد ما الطالب يشتريه
+      isLocked: true
     };
     const updated = [...courses, courseData];
     setCourses(updated);
@@ -111,8 +151,8 @@ export default function AdminDashboard() {
   return (
     <div dir="rtl" className="min-h-screen bg-[#070B14] text-gray-100 font-sans flex antialiased selection:bg-[#C8D749]/30">
       
-      {/* 🎛️ السايد بار الداخلي للأدمن فقط */}
-      <aside className="w-72 bg-[#0D1524] border-l border-white/5 p-6 flex flex-col justify-between sticky top-0 h-screen">
+      {/* 🎛️ السايد بار الداخلي المطور للأدمن */}
+      <aside className="w-72 bg-[#0D1524] border-l border-white/5 p-6 flex flex-col justify-between sticky top-0 h-screen z-20 shrink-0">
         <div className="space-y-8">
           <div className="flex items-center gap-2 px-2" dir="ltr">
             <span className="text-xl">👑</span>
@@ -122,10 +162,11 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* تابات التحكم الموحدة */}
+          {/* تابات التحكم الموحدة بعد إضافة تابة الطلاب */}
           <nav className="space-y-1.5">
             {[
               { id: "overview", label: "نظرة عامة وإحصائيات", icon: "📊" },
+              { id: "students", label: "إدارة ومتابعة الطلاب", icon: "👥" },
               { id: "courses", label: "إدارة ورفع الكورسات", icon: "📚" },
               { id: "academic", label: "أسئلة الدعم العلمي", icon: "🧪" },
               { id: "tech", label: "شكاوى الدعم الفني", icon: "🛠️" },
@@ -153,7 +194,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* 🖥️ منطقة المحتوى الإمبراطورية الموحدة */}
-      <main className="flex-1 p-8 md:p-12 overflow-y-auto max-w-6xl">
+      <main className="flex-1 p-8 md:p-12 overflow-y-auto max-w-6xl relative z-10">
         
         {/* ================= 📊 TAB: OVERVIEW ================= */}
         {activeTab === "overview" && (
@@ -163,11 +204,10 @@ export default function AdminDashboard() {
               <p className="text-gray-400 text-xs mt-1">متابعة حالة المنصة بالكامل في كسر من الثانية.</p>
             </div>
             
-            {/* كروت أرقام السيستم الفخمة */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="p-5 bg-[#0D1524]/60 border border-white/5 rounded-2xl">
-                <span className="text-xs text-gray-500 font-bold block">إجمالي الكورسات المرفوعة</span>
-                <span className="text-3xl font-mono font-black text-[#C8D749]">{courses.length} كورس</span>
+                <span className="text-xs text-gray-500 font-bold block">إجمالي الطلاب بالمنصة</span>
+                <span className="text-3xl font-mono font-black text-[#C8D749]">{students.length} طالب</span>
               </div>
               <div className="p-5 bg-[#0D1524]/60 border border-white/5 rounded-2xl">
                 <span className="text-xs text-gray-500 font-bold block">أسئلة علمية تحتاج لرد</span>
@@ -181,6 +221,89 @@ export default function AdminDashboard() {
                 <span className="text-xs text-gray-500 font-bold block">الكروت المولدة بالسيستم</span>
                 <span className="text-3xl font-mono font-black text-emerald-400">{coupons.length} كارت</span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= 👥 TAB: STUDENTS (التاب الجديدة الفخمة) ================= */}
+        {activeTab === "students" && (
+          <div className="space-y-6">
+            <div className="border-b border-white/5 pb-4">
+              <h2 className="text-xl font-black text-white">👥 كشف بيانات الطلاب التفصيلي والسرّي</h2>
+              <p className="text-gray-400 text-xs mt-1">متابعة الحسابات المنشأة، مراجعة كلمات المرور وحالة النشاط اللحظية للطلاب.</p>
+            </div>
+
+            {/* الفلترة والبحث الذكي */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#0D1524]/40 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
+              <input 
+                type="text"
+                placeholder="ابحث باسم الطالب أو رقم الهاتف..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:max-w-md px-4 py-2.5 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors"
+              />
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button 
+                  onClick={() => setStudentFilter("all")}
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all ${studentFilter === "all" ? "bg-[#C8D749] text-[#070B14]" : "bg-white/5 text-gray-400"}`}
+                >
+                  كل الطلاب ({students.length})
+                </button>
+                <button 
+                  onClick={() => setStudentFilter("active")}
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all ${studentFilter === "active" ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-white/5 text-gray-400"}`}
+                >
+                  النشطين الآن 🟢
+                </button>
+              </div>
+            </div>
+
+            {/* الجدول الزجاجي الشامل */}
+            <div className="w-full rounded-2xl bg-[#0D1524]/60 border border-white/5 backdrop-blur-sm shadow-2xl overflow-x-auto">
+              <table className="w-full text-right border-collapse min-w-[950px]">
+                <thead>
+                  <tr className="border-b border-white/5 bg-[#070B14]/50 text-gray-400 text-xs font-bold">
+                    <th className="p-4">اسم الطالب رباعي</th>
+                    <th className="p-4">رقم هاتف الطالب</th>
+                    <th className="p-4">أرقام أولياء الأمور (الأب / الأم)</th>
+                    <th className="p-4">المحافظة والسنة الدراسية</th>
+                    <th className="p-4 text-[#C8D749]">كلمة المرور (الباسورد)</th>
+                    <th className="p-4">حالة الجلسة</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs divide-y divide-white/5">
+                  {filteredStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="p-8 text-center text-gray-500 font-medium">لا يوجد بيانات تطابق بحثك حالياً.</td>
+                    </tr>
+                  ) : (
+                    filteredStudents.map((student, idx) => (
+                      <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="p-4 font-black text-white">
+                          {student.firstName} {student.secondName} {student.thirdName} {student.lastName}
+                        </td>
+                        <td className="p-4 font-mono text-gray-300" dir="ltr">{student.studentPhone}</td>
+                        <td className="p-4 space-y-1">
+                          <div className="text-[11px] text-gray-400 font-mono" dir="ltr">👨‍👦 أب: {student.fatherPhone}</div>
+                          <div className="text-[11px] text-gray-500 font-mono" dir="ltr">👩‍👦 أم: {student.motherPhone}</div>
+                        </td>
+                        <td className="p-4 space-y-1">
+                          <span className="inline-block bg-white/5 border border-white/10 rounded px-2 py-0.5 text-[10px] text-gray-300 ml-1">{student.governorate}</span>
+                          <span className="inline-block bg-[#C8D749]/10 rounded px-2 py-0.5 text-[10px] font-bold text-[#C8D749]">{student.academicYear}</span>
+                        </td>
+                        <td className="p-4 font-mono font-black text-[#C8D749] bg-[#C8D749]/5 select-all rounded">
+                          {student.password}
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-block px-2 py-1 rounded text-[10px] font-bold ${student.lastLogin.includes("نشط") ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-gray-500/10 text-gray-400"}`}>
+                            {student.lastLogin}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -309,7 +432,6 @@ export default function AdminDashboard() {
               </button>
             </form>
 
-            {/* عرض الأكواد المولدة بالسيستم لمراجعتها أو طباعتها */}
             <div className="space-y-2">
               <h3 className="text-xs font-bold text-gray-400 px-1">📋 قائمة الأكواد النشطة بالنظام:</h3>
               <div className="max-h-60 overflow-y-auto border border-white/5 bg-[#070B14]/40 rounded-xl p-3 space-y-1.5 font-mono text-xs">
