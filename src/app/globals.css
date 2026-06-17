@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@source "./page.tsx";
+@source "./**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  /* سستم الألوان المخصص لـ v4 */
+}
+
+body {
+  direction: rtl;
+  background-color: #070B14;
+  margin: 0;
+  padding: 0;
+}
