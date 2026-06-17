@@ -7,8 +7,12 @@ export function middleware(request) {
   // 2. قراءة الكوكيز (رخصة الدخول)
   const userSession = request.cookies.get("user_session");
 
-  // 3. تحديد الصفحات العامة المسموح بدخولها بدون تسجيل
-  const isPublicPage = pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password";
+  // 3. تحديد الصفحات العامة المسموح بدخولها بدون تسجيل (ضفنا مسار الجذر "/" لصفحة الهبوط)
+  const isPublicPage = 
+    pathname === "/" || 
+    pathname === "/login" || 
+    pathname === "/signup" || 
+    pathname === "/forgot-password";
 
   // 🔒 الحالة الأولى: الطالب مش مسجل دخول وبيحاول يدخل صفحة خاصة (زي الهوم أو الداش بورد)
   if (!userSession && !isPublicPage) {
@@ -16,7 +20,7 @@ export function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 🔒 الحالة الثانية: الطالب مسجل دخول بالفعل، فممنوع يرجع لصفحات الـ Login؛ بنطيره فوراً للـ Home الرئيسية
+  // 🔒 الحالة الثانية: الطالب مسجل دخول بالفعل، فممنوع يرجع لصفحات الـ Login أو صفحة الهبوط؛ بنطيره فوراً للـ Home الرئيسية
   if (userSession && isPublicPage) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
