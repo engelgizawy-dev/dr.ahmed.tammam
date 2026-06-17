@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+// استيراد أدوات فايربيز المطلوبة للتشييك الصاروخي
+import { db } from "@/firebase"; 
+import { collection, query, where, getDocs, or } from "firebase/firestore";
 
 const EGYPT_GOVERNORATES = [
   "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "البحر الأحمر", "البحيرة", 
@@ -45,7 +48,7 @@ export default function SignupPage() {
     setGeneralError("");
     setPasswordError("");
 
-    // التحققات الأساسية
+    // 1️⃣ التحققات الأساسية في الفرونت إند
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("عذراً، كلمات المرور التي أدخلتها غير متطابقة!");
       return;
@@ -56,21 +59,50 @@ export default function SignupPage() {
     }
 
     setLoading(true);
-    try {
-      console.log("جاري الحفظ المحلي والتوجيه الفوري لصفحة الهوم الرئيسية...");
 
-      // 💾 1. حفظ البيانات رباعياً بالكامل محلياً عشان الـ Profile يقدر يقرأها
+    try {
+      // 2️⃣ الاستعلام المركب الصاروخي (Compound Query) لمنع التكرار بدون ثقل
+      const usersRef = collection(db, "users");
+      
+      const duplicateCheckQuery = query(
+        usersRef,
+        or(
+          where("studentPhone", "==", formData.studentPhone),
+          where("fatherPhone", "==", formData.studentPhone),
+          where("motherPhone", "==", formData.studentPhone),
+          where("studentPhone", "==", formData.fatherPhone),
+          where("fatherPhone", "==", formData.fatherPhone),
+          where("motherPhone", "==", formData.fatherPhone),
+          where("studentPhone", "==", formData.motherPhone),
+          where("fatherPhone", "==", formData.motherPhone),
+          where("motherPhone", "==", formData.motherPhone)
+        )
+      );
+
+      const querySnapshot = await getDocs(duplicateCheckQuery);
+
+      // لو لقانا أي سجل متطابق بنقفل الباب فوراً ونمنع الحساب الوهمي
+      if (!querySnapshot.empty) {
+        setGeneralError("عذراً، أحد الأرقام المدخلة (رقمك أو رقم أحد أولياء الأمور) مسجل مسبقاً بحساب آخر في المنصة!");
+        setLoading(false);
+        return;
+      }
+
+      // 3️⃣ لو الأرقام سليمة وفريدة.. بنكمل الحفظ والتوجيه
+      console.log("الأرقام سليمة وفريدة 100%.. جاري الحفظ والتوجيه الفوري...");
+
+      // 💾 حفظ البيانات رباعياً بالكامل محلياً عشان الـ Profile يقرأها
       localStorage.setItem("temp_student_data", JSON.stringify(formData));
       
-      // 🍪 2. زرع كوكيز الجلسة فوراً عشان الـ Middleware يفتح الباب وميطردش الطالب
-      document.cookie = `user_session=${formData.studentPhone}; path=/; max-age=86400`; // صالحة لمدة يوم
+      // 🍪 زرع كوكيز الجلسة فوراً عشان الـ Middleware يفتح الباب وميطردش الطالب
+      document.cookie = `user_session=${formData.studentPhone}; path=/; max-age=86400`; 
 
-      // 🚀 3. طيران مباشر وفوري على الصفحة الرئيسية (الكورسات)
+      // 🚀 طيران مباشر وفوري على الصفحة الرئيسية
       router.push("/home");
 
     } catch (err) {
-      console.error(err);
-      setGeneralError("حدث خطأ غير متوقع.");
+      console.error("حدث خطأ أثناء فحص البيانات والاتصال بـ Firebase:", err);
+      setGeneralError("حدث خطأ أثناء فحص البيانات المكررة. تأكد من إعدادات الـ API Key الخاص بك.");
     } finally {
       setLoading(false);
     }
@@ -78,71 +110,78 @@ export default function SignupPage() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#070B14] text-gray-100 font-sans flex flex-col justify-center items-center p-6 relative overflow-x-hidden selection:bg-[#C8D749]/30">
+      
+      {/* الدوائر المشعة للـ Glassmorphism البرستيج */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
         <div className="absolute top-[10%] right-[10%] w-72 h-72 bg-[#C8D749]/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-[10%] left-[10%] w-72 h-72 bg-[#0E5159]/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="w-full max-w-2xl bg-[#0D1524]/80 border border-white/5 backdrop-blur-md rounded-2xl p-8 md:p-10 shadow-[0_0_5px_rgba(200,215,73,0.1)] relative z-10 my-10">
+      {/* الكارت الزجاجي المركزي المحمي */}
+      <div className="w-full max-w-2xl bg-[#0D1524]/60 border border-white/5 backdrop-blur-md rounded-2xl p-8 md:p-10 shadow-[0_0_25px_rgba(200,215,73,0.05)] relative z-10 my-10">
         
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2" dir="ltr">
-            <svg className="w-8 h-8 text-[#C8D749]" viewBox="0 0 24 24" fill="currentColor">
+            <span className="text-2xl font-black text-white tracking-wider">Tammam <span className="text-[#C8D749] text-sm font-bold">SOCIETY</span></span>
+            <svg className="w-6 h-6 text-[#C8D749]" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
             </svg>
-            <span className="text-2xl font-black text-white tracking-wider">Tammam <span className="text-[#C8D749] text-sm font-bold">SOCIETY</span></span>
           </div>
-          <h2 className="text-3xl font-black text-white mb-2">إنشاء حساب طالب جديد</h2>
-          <p className="text-gray-400 text-sm">امْلأ البيانات التالية بدقة للانضمام إلى رفاق الدكتور أحمد تمام</p>
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-2">إنشاء حساب طالب جديد</h2>
+          <p className="text-gray-400 text-xs md:text-sm">امْلأ البيانات التالية بدقة للانضمام إلى رفاق الدكتور أحمد تمام</p>
         </div>
 
         {generalError && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold flex items-center gap-2">
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs md:text-sm font-bold flex items-center gap-2 animate-shake">
             ⚠️ {generalError}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           
+          {/* حقول الاسم الرباعي */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-300 mb-2">الاسم الأول</label>
-              <input type="text" name="firstName" required value={formData.firstName} onChange={handleChange} placeholder="اسمك" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
+              <label className="block text-xs font-bold text-gray-400 mb-2">الاسم الأول</label>
+              <input type="text" name="firstName" required value={formData.firstName} onChange={handleChange} placeholder="اسمك" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
             </div>
             <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-300 mb-2">اسم الأب</label>
-              <input type="text" name="secondName" required value={formData.secondName} onChange={handleChange} placeholder="الأب" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
+              <label className="block text-xs font-bold text-gray-400 mb-2">اسم الأب</label>
+              <input type="text" name="secondName" required value={formData.secondName} onChange={handleChange} placeholder="الأب" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
             </div>
             <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-300 mb-2">اسم الجد</label>
-              <input type="text" name="thirdName" required value={formData.thirdName} onChange={handleChange} placeholder="الجد" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
+              <label className="block text-xs font-bold text-gray-400 mb-2">اسم الجد</label>
+              <input type="text" name="thirdName" required value={formData.thirdName} onChange={handleChange} placeholder="الجد" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
             </div>
             <div>
-              <label className="block text-xs md:text-sm font-medium text-gray-300 mb-2">لقب العائلة</label>
-              <input type="text" name="lastName" required value={formData.lastName} onChange={handleChange} placeholder="العائلة" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
+              <label className="block text-xs font-bold text-gray-400 mb-2">لقب العائلة</label>
+              <input type="text" name="lastName" required value={formData.lastName} onChange={handleChange} placeholder="العائلة" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
             </div>
           </div>
 
+          {/* رقم الطالب */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">رقم هاتف الطالب (واتساب)</label>
-            <input type="tel" name="studentPhone" required pattern="[0-9]{11}" value={formData.studentPhone} onChange={handleChange} placeholder="مثال: 01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
+            <label className="block text-xs font-bold text-gray-400 mb-2">رقم هاتف الطالب (واتساب)</label>
+            <input type="tel" name="studentPhone" required pattern="[0-9]{11}" value={formData.studentPhone} onChange={handleChange} placeholder="مثال: 01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
           </div>
 
+          {/* أرقام أولياء الأمور */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">رقم هاتف ولي الأمر (الأب)</label>
-              <input type="tel" name="fatherPhone" required pattern="[0-9]{11}" value={formData.fatherPhone} onChange={handleChange} placeholder="01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
+              <label className="block text-xs font-bold text-gray-400 mb-2">رقم هاتف ولي الأمر (الأب)</label>
+              <input type="tel" name="fatherPhone" required pattern="[0-9]{11}" value={formData.fatherPhone} onChange={handleChange} placeholder="01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">رقم هاتف ولي الأمر (الأم)</label>
-              <input type="tel" name="motherPhone" required pattern="[0-9]{11}" value={formData.motherPhone} onChange={handleChange} placeholder="01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
+              <label className="block text-xs font-bold text-gray-400 mb-2">رقم هاتف ولي الأمر (الأم)</label>
+              <input type="tel" name="motherPhone" required pattern="[0-9]{11}" value={formData.motherPhone} onChange={handleChange} placeholder="01xxxxxxxxx" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm text-left placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" dir="ltr" />
             </div>
           </div>
 
+          {/* السنة والمحافظة */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">السنة الدراسية</label>
-              <select name="academicYear" required value={formData.academicYear} onChange={handleChange} className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white focus:outline-none focus:border-[#C8D749] transition-colors cursor-pointer appearance-none" style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg fill=\'white\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>")', backgroundPosition: 'left 12px center', backgroundRepeat: 'no-repeat' }}>
+              <label className="block text-xs font-bold text-gray-400 mb-2">السنة الدراسية</label>
+              <select name="academicYear" required value={formData.academicYear} onChange={handleChange} className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm focus:outline-none focus:border-[#C8D749] transition-colors cursor-pointer appearance-none" style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg fill=\'white\' height=\'16\' viewBox=\'0 0 24 24\' width=\'16\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>")', backgroundPosition: 'left 12px center', backgroundRepeat: 'no-repeat' }}>
                 <option value="" disabled>اختر سنتك الدراسية</option>
                 <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
                 <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
@@ -150,8 +189,8 @@ export default function SignupPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">المحافظة</label>
-              <select name="governorate" required value={formData.governorate} onChange={handleChange} className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white focus:outline-none focus:border-[#C8D749] transition-colors cursor-pointer appearance-none" style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg fill=\'white\' height=\'24\' viewBox=\'0 0 24 24\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>")', backgroundPosition: 'left 12px center', backgroundRepeat: 'no-repeat' }}>
+              <label className="block text-xs font-bold text-gray-400 mb-2">المحافظة</label>
+              <select name="governorate" required value={formData.governorate} onChange={handleChange} className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm focus:outline-none focus:border-[#C8D749] transition-colors cursor-pointer appearance-none" style={{ backgroundImage: 'url("data:image/svg+xml;utf8,<svg fill=\'white\' height=\'16\' viewBox=\'0 0 24 24\' width=\'16\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>")', backgroundPosition: 'left 12px center', backgroundRepeat: 'no-repeat' }}>
                 <option value="" disabled>اختر محافظتك</option>
                 {EGYPT_GOVERNORATES.map((gov) => (
                   <option key={gov} value={gov}>{gov}</option>
@@ -160,24 +199,25 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {/* الباسوردات */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">إنشاء كلمة المرور</label>
-              <input type="password" name="password" required minLength={6} value={formData.password} onChange={handleChange} placeholder="••••••••" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
+              <label className="block text-xs font-bold text-gray-400 mb-2">إنشاء كلمة المرور</label>
+              <input type="password" name="password" required minLength={6} value={formData.password} onChange={handleChange} placeholder="••••••••" className="w-full px-4 py-3 rounded-xl bg-[#070B14] border border-[#1A263D] text-white text-xs md:text-sm placeholder-gray-600 focus:outline-none focus:border-[#C8D749] transition-colors" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">تأكيد كلمة المرور</label>
-              <input type="password" name="confirmPassword" required minLength={6} value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" className={`w-full px-4 py-3 rounded-xl bg-[#070B14] border text-white placeholder-gray-600 focus:outline-none transition-colors ${passwordError ? 'border-red-500 focus:border-red-500' : 'border-[#1A263D] focus:border-[#C8D749]'}`} />
-              {passwordError && <p className="mt-2 text-xs md:text-sm font-medium text-red-400 flex items-center gap-1 animate-pulse">❌ {passwordError}</p>}
+              <label className="block text-xs font-bold text-gray-400 mb-2">تأكيد كلمة المرور</label>
+              <input type="password" name="confirmPassword" required minLength={6} value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" className={`w-full px-4 py-3 rounded-xl bg-[#070B14] border text-xs md:text-sm text-white placeholder-gray-600 focus:outline-none transition-colors ${passwordError ? 'border-red-500 focus:border-red-500' : 'border-[#1A263D] focus:border-[#C8D749]'}`} />
+              {passwordError && <p className="mt-2 text-xs font-bold text-red-400 flex items-center gap-1 animate-pulse">❌ {passwordError}</p>}
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full py-4 mt-4 rounded-xl text-lg font-black bg-[#C8D749] text-[#070B14] hover:bg-[#b5c43d] transition-all duration-300 shadow-[0_0_25px_rgba(200,215,73,0.2)] disabled:opacity-50">
-            {loading ? "جاري تهيئة الجلسة الآمنة..." : "تسجيل وإنشاء الحساب عـلـى المنصة"}
+          <button type="submit" disabled={loading} className="w-full py-4 mt-4 rounded-xl text-sm font-black bg-[#C8D749] text-[#070B14] hover:bg-[#b5c43d] hover:scale-[1.01] transition-all duration-300 shadow-[0_0_30px_rgba(200,215,73,0.15)] disabled:opacity-50">
+            {loading ? "جاري فحص وتأمين بيانات الأرقام بثوانٍ..." : "تسجيل وإنشاء الحساب عـلـى المنصة"}
           </button>
         </form>
 
-        <div className="text-center mt-6 text-sm text-gray-400">
+        <div className="text-center mt-6 text-xs text-gray-400">
           لديك حساب بالفعل؟ <Link href="/login" className="text-[#C8D749] font-bold hover:underline">تسجيل الدخول من هنا</Link>
         </div>
       </div>
