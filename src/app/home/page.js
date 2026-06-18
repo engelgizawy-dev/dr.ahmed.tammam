@@ -23,20 +23,22 @@ export default function CoursesHome() {
       const defaultCourses = [
         {
           id: "c1",
-          title: "الباب الأول: الدعامة والحركة في الكائنات الحية",
-          description: "شرح تفصيلي ومكثف لجميع أجزاء الهيكل العظمي، العضلات، وآليات الانقباض العضلي مع حل أفكار الوزارة وتريكات امتحانات السنين السابقة.",
+          title: "نموذج إجابة كتاب الأحياء الشامل - د. أحمد تمام 3ث",
+          description: "ده نموذج إجابة كتاب الشرح والأسئلة بالكامل، عشان تراجع حلك وتشوف الإجابة النموذجية وتطمن إنك ماشي صح بالتوفيق ياصديقي .. ❤️",
           lecturesCount: 8,
-          price: 150,
+          price: 0,
           isLocked: false,
+          isPinned: true,
           image: "https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?q=80&w=600&auto=format&fit=crop"
         },
         {
           id: "c2",
-          title: "الباب الثاني: التنسيق الهرموني (الغدد الصماء)",
-          description: "دراسة شاملة لجميع هرمونات الجسم في النبات والإنسان، وحل عقدة أسئلة العلاقات البيانية والتحليلات الطبية.",
+          title: "الباب الثاني - المراجعة النهائية والتنسيق الهرموني",
+          description: "المراجعة النهائية الشاملة على التنسيق الهرموني في الكائنات الحية وحل آلاف الأسئلة الاستنتاجية لتقفيل المادة.",
           lecturesCount: 6,
-          price: 120,
+          price: 170,
           isLocked: true,
+          isPinned: true,
           image: "https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=600&auto=format&fit=crop"
         }
       ];
@@ -46,110 +48,115 @@ export default function CoursesHome() {
   }, []);
 
   return (
-    <div className="space-y-8 animate-fadeIn relative">
+    <div className="space-y-12 relative font-sans antialiased">
       
-      {/* 🖥️ شريط الأدوات العلوي الفخم (مستوحى بالكامل من الصورة) */}
-      <div className="w-full bg-[#0b1329]/40 backdrop-blur-md border border-white/[0.05] rounded-2xl p-4 flex justify-between items-center z-20 relative">
-        
-        {/* القسم الأيمن: بادج السنة الدراسية */}
-        <div className="bg-[#C8D749]/10 border border-[#C8D749]/20 px-4 py-2 rounded-xl text-xs font-mono font-black text-[#C8D749] tracking-wider">
+      {/* 🖥️ شريط الأدوات العلوي الفخم بالملي مثل الصورة */}
+      <div className="w-full bg-[#0d1524] border border-white/5 rounded-2xl p-4 flex justify-between items-center z-20 relative shadow-xl">
+        <div className="bg-[#C8D749]/10 border border-[#C8D749]/20 px-4 py-2 rounded-xl text-xs font-black text-[#C8D749]">
           🎯 ثانوية عامة 2026
         </div>
 
-        {/* القسم الأيسر: الإشعارات، الإضاءة، المحفظة والبروفايل */}
         <div className="flex items-center gap-4" dir="ltr">
-          
-          {/* البروفايل الدائري الفخم */}
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#C8D749] to-blue-500 p-[2px] cursor-pointer shadow-md transform hover:scale-105 transition-transform duration-150">
-            <div className="w-full h-full bg-[#030712] rounded-full flex items-center justify-center text-sm font-black text-white">
+          {/* البروفايل الدائري */}
+          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#C8D749] to-blue-500 p-[2px] cursor-pointer">
+            <div className="w-full h-full bg-[#070B14] rounded-full flex items-center justify-center text-xs font-black text-white">
               👤
             </div>
           </div>
 
-          {/* خانة الإشعارات المضيئة */}
-          <button className="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.08] hover:border-white/[0.15] text-gray-300 hover:text-white flex items-center justify-center text-lg shadow-sm transition-all duration-150 relative">
+          {/* الإشعارات */}
+          <button className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-gray-300 flex items-center justify-center text-md relative hover:bg-white/10 transition-all duration-150">
             🔔
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full"></span>
           </button>
 
-          {/* خانة الإضاءة الليلية التفاعلية */}
+          {/* التوجل الليلي */}
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-1.5 rounded-2xl bg-black/40 border border-white/[0.05] flex items-center gap-1.5 cursor-pointer shadow-inner transition-all duration-150"
+            className="p-1 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1 cursor-pointer"
           >
-            <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm transition-all duration-150 ${isDarkMode ? "bg-white/10 text-white font-black" : "text-gray-500"}`}>🌙</div>
-            <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm transition-all duration-150 ${!isDarkMode ? "bg-[#C8D749] text-[#070B14] font-black" : "text-gray-500"}`}>☀️</div>
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-all duration-150 ${isDarkMode ? "bg-white/10 text-white font-black" : "text-gray-500"}`}>🌙</div>
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-all duration-150 ${!isDarkMode ? "bg-[#C8D749] text-[#070B14] font-black" : "text-gray-500"}`}>☀️</div>
           </button>
 
-          {/* خانة محفظة الرصيد المحمية */}
-          <div className="bg-[#030712] border border-white/[0.05] pl-4 pr-3 py-2 rounded-xl flex items-center gap-2 shadow-inner">
-            <span className="text-[11px] text-gray-400 font-extrabold font-sans">0.00 ج.م</span>
-            <div className="w-5 h-5 rounded-md bg-[#C8D749]/10 flex items-center justify-center text-xs">💰</div>
+          {/* الرصيد */}
+          <div className="bg-[#070B14] border border-white/5 pl-4 pr-3 py-1.5 rounded-xl flex items-center gap-2">
+            <span className="text-xs text-gray-300 font-black">0 جنه</span>
+            <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center text-xs">💰</div>
           </div>
-
         </div>
       </div>
 
-      {/* 📚 شبكة الكورسات الكبيرة جداً والعريضة 📚 */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-8 relative z-10">
+      {/* 📚 شبكة الكورسات بتوزيع بسطتهالك الفخم 📚 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 relative z-10 pt-4">
         {courses.map((course) => (
           <div 
             key={course.id} 
-            className="group flex flex-col md:flex-row bg-[#0b1329]/90 border border-white/[0.05] backdrop-blur-xl rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.6)] hover:border-[#C8D749]/30 transition-all duration-150"
+            className="group flex flex-col relative rounded-3xl transition-all duration-150 select-none"
           >
-            {/* 🖼️ البوستر: عريض وكبير جداً ومأخوذ من تصميم الهيدروليك الشامل للشركة */}
-            <div className="relative w-full md:w-[45%] h-64 md:h-auto min-h-[260px] overflow-hidden bg-black/40 border-b md:border-b-0 md:border-l border-white/[0.05]">
+            {/* 🖼️ غلاف الكورس الخلفي المنفصل بمظهر مربع ومحمي */}
+            <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-[#0d1524] border border-white/5 shadow-md">
               <img 
-                src={course.image || "https://via.placeholder.com/600x400/0d1524/C8D749?text=Tammam+Biology"} 
+                src={course.image} 
                 alt={course.title} 
-                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-150 ease-out"
+                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-150"
               />
-              <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0b1329] via-transparent to-black/20" />
-              
-              {/* بادج عدد المحاضرات الفخم */}
-              <span className="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white text-[11px] font-extrabold px-3 py-1.5 rounded-xl border border-white/[0.08] shadow-md tracking-wide">
-                📂 {course.lecturesCount} محاضرات
-              </span>
+              {/* شريط كورس مثبت المائل في الزاوية */}
+              {course.isPinned && (
+                <div className="absolute top-5 -right-11 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-black px-12 py-1 rotate-45 shadow-lg uppercase tracking-widest border-b border-white/10">
+                  كورس مثبت
+                </div>
+              )}
             </div>
 
-            {/* 📝 علبة التفاصيل والنصوص العريضة والخط السميك */}
-            <div className="p-6 md:p-8 flex flex-col justify-between flex-1 space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-2xl font-black text-white group-hover:text-[#C8D749] transition-colors leading-snug tracking-wide">
+            {/* 📝 العلبة الغامقة السفلية الراكبة فوق الصورة بالملي */}
+            <div className="bg-[#0d1524] border border-white/5 rounded-3xl p-6 -mt-20 mx-3 relative z-10 flex flex-col justify-between shadow-[0_15px_40px_rgba(0,0,0,0.6)] group-hover:border-white/10 transition-colors flex-1 space-y-6">
+              
+              <div className="space-y-3">
+                <h3 className="text-base font-black text-white leading-snug tracking-wide pt-1 min-h-[48px] line-clamp-2">
                   {course.title}
                 </h3>
-                <p className="text-gray-300 text-xs leading-relaxed font-extrabold opacity-90">
+                <p className="text-gray-400 text-[11px] font-bold leading-relaxed line-clamp-3 opacity-90">
                   {course.description}
                 </p>
               </div>
 
-              {/* 🛠️ منطقة الأزرار وتفاصيل الشراء العريضة */}
-              <div className="pt-4 border-t border-white/[0.04] flex flex-col gap-4">
-                <div className="flex items-center justify-between gap-4">
-                  
-                  {/* زر الدخول العريض والسميك جداً للطلب والتحكم */}
+              {/* الأزرار وتفاصيل الشراء المظبوطة هندسياً */}
+              <div className="pt-4 border-t border-white/5 flex flex-col gap-4">
+                
+                {/* الصف الأول: زر الدخول وبادج الحالة */}
+                <div className="flex items-center justify-between gap-3">
                   <button 
-                    className={`flex-1 py-4 px-6 rounded-xl font-black text-xs transition-all duration-150 flex items-center justify-center gap-2 transform hover:scale-[1.01] tracking-wider ${
-                      course.isLocked 
-                        ? "bg-[#030712] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.04]" 
-                        : "bg-gradient-to-r from-[#C8D749] to-[#b5c43d] text-[#070B14] shadow-[0_4px_25px_rgba(200,215,73,0.3)] hover:opacity-95"
-                    }`}
+                    className="px-4 py-2 rounded-xl font-black text-[11px] border border-teal-500/30 bg-teal-500/10 text-teal-400 hover:bg-teal-500 hover:text-[#070B14] transition-all duration-150"
                   >
-                    {course.isLocked ? (
-                      <><span className="text-sm">🔒</span><span className="font-black text-sm">اشترك الآن !</span></>
-                    ) : (
-                      <><span className="text-sm">📖</span><span className="font-black text-sm">الدخول للكورس</span></>
-                    )}
+                    الدخول للكورس
                   </button>
 
-                  {/* علبة عرض السعر مثل تصميم بسطتهالك العريض */}
-                  <div className="bg-[#030712] border border-white/[0.05] px-5 py-3 rounded-xl flex items-center justify-center shadow-inner min-w-[110px]">
-                    <span className="text-[#C8D749] font-mono font-black text-sm tracking-widest">
-                      {course.price.toFixed(2)} <span className="font-sans text-[10px] text-gray-400 font-extrabold mr-1">جنية</span>
+                  {course.price === 0 ? (
+                    <span className="bg-purple-600/20 border border-purple-500/30 text-purple-400 font-black text-[10px] px-3 py-1.5 rounded-xl">
+                      كورس مجاني !
                     </span>
+                  ) : (
+                    <button className="px-4 py-2 rounded-xl font-black text-[11px] bg-sky-500 text-white hover:bg-sky-400 transition-all duration-150">
+                      إشترك الآن !
+                    </button>
+                  )}
+                </div>
+
+                {/* الصف الثاني: التواريخ والأسعار بالروقان المظبوط */}
+                <div className="flex items-center justify-between text-[10px] text-gray-500 font-bold pt-1">
+                  <div className="flex flex-col gap-0.5 text-right">
+                    <span>الأربعاء، ١٧ يونيو ٢٠٢٦ م</span>
+                    <span>الثلاثاء، ٠٥ مايو ٢٠٢٦ م</span>
                   </div>
 
+                  {course.price > 0 && (
+                    <div className="bg-[#070B14] border border-white/5 pl-3 pr-2 py-1.5 rounded-xl flex items-center justify-center font-mono font-black text-xs text-teal-400 shadow-inner">
+                      {course.price.toFixed(2)} <span className="font-sans text-[9px] text-gray-500 mr-1">جنيهاً</span>
+                    </div>
+                  )}
                 </div>
+
               </div>
             </div>
 
