@@ -6,16 +6,30 @@ import { useRouter } from "next/navigation";
 export default function CoursesHome() {
   const router = useRouter();
   const [courses, setCourses] = useState([]);
-  const [studentName, setStudentName] = useState("عبدالعزيز خالد عبدالعزيز");
+  const [studentName, setStudentName] = useState("دكتور المستقبل");
   const [isDarkMode, setIsDarkMode] = useState(true);
 
+  // 🕒 دالة لتوليد تاريخ فعلي بناءً على وقت دخول الطالب
+  const getDynamicDate = (daysOffset = 0) => {
+    const date = new Date();
+    date.setDate(date.getDate() + daysOffset);
+    return date.toLocaleDateString("ar-EG", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   useEffect(() => {
+    // 1. جلب اسم الطالب
     const savedData = localStorage.getItem("temp_student_data");
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      setStudentName(parsed.firstName || "عبدالعزيز خالد عبدالعزيز");
+      setStudentName(parsed.firstName || "دكتور المستقبل");
     }
 
+    // 2. جلب أو تهيئة الكورسات
     const globalCourses = localStorage.getItem("tammam_courses_list");
     if (globalCourses) {
       setCourses(JSON.parse(globalCourses));
@@ -23,23 +37,25 @@ export default function CoursesHome() {
       const defaultCourses = [
         {
           id: "c1",
-          title: "نموذج إجابة كتاب الأحياء الشامل - د. أحمد تمام 3ث",
-          description: "ده نموذج إجابة كتاب الشرح والأسئلة بالكامل، عشان تراجع حلك وتشوف الإجابة النموذجية وتطمن إنك ماشي صح بالتوفيق ياصديقي .. ❤️",
+          title: "الباب الأول: الدعامة والحركة في الكائنات الحية 🧬",
+          description: "شرح تفصيلي ومكثف لجميع أجزاء الهيكل العظمي، العضلات، وآليات الانقباض العضلي بأسلوب علمي متطور.",
           lecturesCount: 8,
           price: 0,
           isLocked: false,
           isPinned: true,
-          image: "https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?q=80&w=600&auto=format&fit=crop"
+          startDate: getDynamicDate(0), // تاريخ اليوم
+          image: "https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?q=80&w=800&auto=format&fit=crop"
         },
         {
           id: "c2",
-          title: "الباب الثاني - المراجعة النهائية والتنسيق الهرموني",
-          description: "المراجعة النهائية الشاملة على التنسيق الهرموني في الكائنات الحية وحل آلاف الأسئلة الاستنتاجية لتقفيل المادة.",
+          title: "الباب الثاني: التنسيق الهرموني والغدد الصماء 🔬",
+          description: "دراسة شاملة لجميع هرمونات الجسم في النبات والإنسان، وحل عقدة أسئلة العلاقات البيانية والتحليلات الطبية.",
           lecturesCount: 6,
           price: 170,
           isLocked: true,
-          isPinned: true,
-          image: "https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=600&auto=format&fit=crop"
+          isPinned: false,
+          startDate: getDynamicDate(3), // تاريخ بعد 3 أيام
+          image: "https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=800&auto=format&fit=crop"
         }
       ];
       localStorage.setItem("tammam_courses_list", JSON.stringify(defaultCourses));
@@ -48,112 +64,132 @@ export default function CoursesHome() {
   }, []);
 
   return (
-    <div className="space-y-12 relative font-sans antialiased">
+    <div className="space-y-10 relative font-sans antialiased pb-10">
       
-      {/* 🖥️ شريط الأدوات العلوي الفخم بالملي مثل الصورة */}
-      <div className="w-full bg-[#0d1524] border border-white/5 rounded-2xl p-4 flex justify-between items-center z-20 relative shadow-xl">
-        <div className="bg-[#C8D749]/10 border border-[#C8D749]/20 px-4 py-2 rounded-xl text-xs font-black text-[#C8D749]">
-          🎯 ثانوية عامة 2026
+      {/* 🌿 شريط الأدوات العلوي (ضخم، واضح، وألوان متناسقة) */}
+      <div className="w-full bg-[#0A1120]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-5 flex flex-col md:flex-row justify-between items-center gap-6 z-20 relative shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
+        
+        {/* بادج المرحلة الدراسية */}
+        <div className="bg-emerald-500/10 border border-emerald-500/20 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-inner">
+          <span className="text-xl">🎯</span>
+          <span className="text-sm font-black text-emerald-400 tracking-wide">ثانوية عامة 2026</span>
         </div>
 
-        <div className="flex items-center gap-4" dir="ltr">
-          {/* البروفايل الدائري */}
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#C8D749] to-blue-500 p-[2px] cursor-pointer">
-            <div className="w-full h-full bg-[#070B14] rounded-full flex items-center justify-center text-xs font-black text-white">
-              👤
+        {/* أدوات المستخدم (أيقونات كبيرة ومسافات مريحة) */}
+        <div className="flex items-center gap-5" dir="ltr">
+          
+          {/* أيقونة البروفايل */}
+          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#C8D749] to-emerald-500 p-[2px] cursor-pointer hover:scale-105 transition-transform shadow-lg">
+            <div className="w-full h-full bg-[#070B14] rounded-full flex items-center justify-center text-xl">
+              👨‍⚕️
             </div>
           </div>
 
           {/* الإشعارات */}
-          <button className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-gray-300 flex items-center justify-center text-md relative hover:bg-white/10 transition-all duration-150">
+          <button className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-gray-300 flex items-center justify-center text-xl relative hover:bg-white/10 hover:text-white transition-all">
             🔔
-            <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+            <span className="absolute top-2.5 right-2.5 w-3 h-3 bg-red-500 border-2 border-[#0A1120] rounded-full animate-pulse"></span>
           </button>
 
-          {/* التوجل الليلي */}
+          {/* زر تبديل الإضاءة */}
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-1 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1 cursor-pointer"
+            className="p-1.5 rounded-2xl bg-black/50 border border-white/10 flex items-center gap-1 cursor-pointer shadow-inner"
           >
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-all duration-150 ${isDarkMode ? "bg-white/10 text-white font-black" : "text-gray-500"}`}>🌙</div>
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs transition-all duration-150 ${!isDarkMode ? "bg-[#C8D749] text-[#070B14] font-black" : "text-gray-500"}`}>☀️</div>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${isDarkMode ? "bg-white/10 text-white shadow-md" : "text-gray-600"}`}>🌙</div>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${!isDarkMode ? "bg-emerald-400 text-[#070B14] shadow-md" : "text-gray-600"}`}>☀️</div>
           </button>
 
-          {/* الرصيد */}
-          <div className="bg-[#070B14] border border-white/5 pl-4 pr-3 py-1.5 rounded-xl flex items-center gap-2">
-            <span className="text-xs text-gray-300 font-black">0 جنه</span>
-            <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center text-xs">💰</div>
+          {/* محفظة الرصيد */}
+          <div className="bg-[#050810] border border-white/10 pl-5 pr-4 py-2.5 rounded-2xl flex items-center gap-3 shadow-inner">
+            <span className="text-sm text-gray-300 font-black tracking-wide">0.00 ج.م</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">💰</div>
           </div>
         </div>
       </div>
 
-      {/* 📚 شبكة الكورسات بتوزيع بسطتهالك الفخم 📚 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 relative z-10 pt-4">
+      {/* 🧬 شبكة الكورسات (كروت ضخمة وتفاصيل احترافية) */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 relative z-10">
         {courses.map((course) => (
           <div 
             key={course.id} 
-            className="group flex flex-col relative rounded-3xl transition-all duration-150 select-none"
+            className="group flex flex-col bg-[#0A1120] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:border-emerald-500/30 transition-all duration-300"
           >
-            {/* 🖼️ غلاف الكورس الخلفي المنفصل بمظهر مربع ومحمي */}
-            <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-[#0d1524] border border-white/5 shadow-md">
+            {/* 🖼️ صورة الكورس (كبيرة وعريضة) */}
+            <div className="relative w-full h-[320px] bg-black/50 overflow-hidden">
               <img 
                 src={course.image} 
                 alt={course.title} 
-                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-150"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100"
               />
-              {/* شريط كورس مثبت المائل في الزاوية */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A1120] via-[#0A1120]/40 to-transparent" />
+              
+              {/* التاجز (Badges) العلوية */}
+              <div className="absolute top-6 left-6 flex flex-col gap-3">
+                <span className="bg-black/60 backdrop-blur-md text-white text-sm font-bold px-5 py-2.5 rounded-2xl border border-white/10 shadow-xl flex items-center gap-2">
+                  <span className="text-lg">📂</span> {course.lecturesCount} محاضرات
+                </span>
+              </div>
+
               {course.isPinned && (
-                <div className="absolute top-5 -right-11 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-black px-12 py-1 rotate-45 shadow-lg uppercase tracking-widest border-b border-white/10">
-                  كورس مثبت
+                <div className="absolute top-8 -right-14 bg-gradient-to-r from-red-600 to-rose-500 text-white text-xs font-black px-16 py-2 rotate-45 shadow-2xl uppercase tracking-widest border-b border-white/20">
+                  📌 كورس مثبت
                 </div>
               )}
             </div>
 
-            {/* 📝 العلبة الغامقة السفلية الراكبة فوق الصورة بالملي */}
-            <div className="bg-[#0d1524] border border-white/5 rounded-3xl p-6 -mt-20 mx-3 relative z-10 flex flex-col justify-between shadow-[0_15px_40px_rgba(0,0,0,0.6)] group-hover:border-white/10 transition-colors flex-1 space-y-6">
+            {/* 📝 محتوى الكورس (نصوص عريضة ومسافات مريحة) */}
+            <div className="p-8 flex flex-col flex-1 space-y-8 -mt-10 relative z-10">
               
-              <div className="space-y-3">
-                <h3 className="text-base font-black text-white leading-snug tracking-wide pt-1 min-h-[48px] line-clamp-2">
+              <div className="space-y-4">
+                <h3 className="text-2xl font-black text-white group-hover:text-emerald-400 transition-colors leading-normal tracking-wide">
                   {course.title}
                 </h3>
-                <p className="text-gray-400 text-[11px] font-bold leading-relaxed line-clamp-3 opacity-90">
+                <p className="text-gray-400 text-sm font-bold leading-relaxed line-clamp-2">
                   {course.description}
                 </p>
               </div>
 
-              {/* الأزرار وتفاصيل الشراء المظبوطة هندسياً */}
-              <div className="pt-4 border-t border-white/5 flex flex-col gap-4">
-                
-                {/* الصف الأول: زر الدخول وبادج الحالة */}
-                <div className="flex items-center justify-between gap-3">
-                  <button 
-                    className="px-4 py-2 rounded-xl font-black text-[11px] border border-teal-500/30 bg-teal-500/10 text-teal-400 hover:bg-teal-500 hover:text-[#070B14] transition-all duration-150"
-                  >
-                    الدخول للكورس
-                  </button>
-
-                  {course.price === 0 ? (
-                    <span className="bg-purple-600/20 border border-purple-500/30 text-purple-400 font-black text-[10px] px-3 py-1.5 rounded-xl">
-                      كورس مجاني !
-                    </span>
-                  ) : (
-                    <button className="px-4 py-2 rounded-xl font-black text-[11px] bg-sky-500 text-white hover:bg-sky-400 transition-all duration-150">
-                      إشترك الآن !
-                    </button>
-                  )}
+              {/* 📅 بلوك التاريخ الفعلي */}
+              <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.05] p-4 rounded-2xl">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xl">
+                  📅
                 </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">تاريخ بدء المحاضرات</span>
+                  <span className="text-sm font-black text-gray-300">{course.startDate || getDynamicDate()}</span>
+                </div>
+              </div>
 
-                {/* الصف الثاني: التواريخ والأسعار بالروقان المظبوط */}
-                <div className="flex items-center justify-between text-[10px] text-gray-500 font-bold pt-1">
-                  <div className="flex flex-col gap-0.5 text-right">
-                    <span>الأربعاء، ١٧ يونيو ٢٠٢٦ م</span>
-                    <span>الثلاثاء، ٠٥ مايو ٢٠٢٦ م</span>
-                  </div>
+              {/* 💳 منطقة الأزرار والأسعار */}
+              <div className="pt-2 flex items-center justify-between gap-6">
+                
+                {/* زر الدخول (ضخم وملفت) */}
+                <button 
+                  className={`flex-1 py-5 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-3 transition-all duration-300 shadow-xl transform hover:translate-y-[-2px] ${
+                    course.isLocked 
+                      ? "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-white" 
+                      : "bg-gradient-to-r from-emerald-500 to-[#C8D749] text-[#050810] hover:shadow-[0_10px_30px_rgba(16,185,129,0.3)]"
+                  }`}
+                >
+                  {course.isLocked ? (
+                    <><span className="text-xl">🔒</span><span className="tracking-wide">فتح الاشتراك الآن</span></>
+                  ) : (
+                    <><span className="text-xl">📖</span><span className="tracking-wide">الدخول للكورس</span></>
+                  )}
+                </button>
 
-                  {course.price > 0 && (
-                    <div className="bg-[#070B14] border border-white/5 pl-3 pr-2 py-1.5 rounded-xl flex items-center justify-center font-mono font-black text-xs text-teal-400 shadow-inner">
-                      {course.price.toFixed(2)} <span className="font-sans text-[9px] text-gray-500 mr-1">جنيهاً</span>
-                    </div>
+                {/* بلوك السعر */}
+                <div className="bg-[#050810] border border-white/10 px-6 py-4 rounded-2xl flex flex-col items-center justify-center shadow-inner min-w-[140px]">
+                  {course.price === 0 ? (
+                    <span className="text-purple-400 font-black text-lg tracking-wide">مجاني 🎁</span>
+                  ) : (
+                    <>
+                      <span className="text-emerald-400 font-mono font-black text-xl tracking-wider">
+                        {course.price.toFixed(2)}
+                      </span>
+                      <span className="font-sans text-[11px] text-gray-500 font-bold mt-1">جنيهاً مصرياً</span>
+                    </>
                   )}
                 </div>
 
