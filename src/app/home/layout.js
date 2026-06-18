@@ -1,133 +1,105 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
 
-export default function HomeLayout({ children }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  
-  // 🎛️ State للتحكم في فتح وقفل السايد بار
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+export default function TopHeader() {
+  // 🌓 State للتحكم في الوضع الليلي والنهاري (الافتراضي ليلي)
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // 📋 مصفوفة أزرار السايد بار الكاملة
-  const sidebarItems = [
-    { id: "home", label: "الصفحة الرئيسية (الكورسات)", icon: "📚", path: "/home" },
-    { id: "profile", label: "حسابي (الملف الشخصي)", icon: "👤", path: "/dashboard" },
-    { id: "homework-results", label: "نتائج الواجبات", icon: "📝", path: "/homework-results" },
-    { id: "exam-results", label: "نتائج الامتحانات", icon: "📊", path: "/exam-results" },
-    { id: "academic-support", label: "الدعم العلمي (الأسئلة)", icon: "🧪", path: "/academic-support" },
-    { id: "tech-support", label: "الدعم الفني والشكاوى", icon: "🛠️", path: "/tech-support" },
-    { id: "wallet", label: "رصيدي المحفظة", icon: "💰", path: "/wallet" },
-    { id: "subscriptions", label: "اشتراكاتي الفعالة", icon: "🔑", path: "/subscriptions" },
-    { id: "center-id", label: "ربط ID السنتر", icon: "🪪", path: "/center-id" },
-    { id: "forum", label: "منتدى الطلاب", icon: "💬", path: "/forum" },
-  ];
-
-  const handleLogout = () => {
-    // 🗑️ مسح كوكيز الجلسة فوراً لضمان الحظر الأمني للمتسللين
-    document.cookie = "user_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    router.push("/login");
+  // 🎨 متغيرات الألوان الديناميكية بناءً على الوضع
+  const theme = {
+    bg: isDarkMode ? "bg-[#050810]" : "bg-[#F3F4F6]", // خلفية الصفحة
+    headerBg: isDarkMode ? "bg-[#0B1221]" : "bg-white", // خلفية العناصر
+    borderColor: isDarkMode ? "border-[#1A263D]" : "border-gray-200",
+    textMain: isDarkMode ? "text-white" : "text-gray-900",
+    textSub: isDarkMode ? "text-gray-400" : "text-gray-500",
+    iconHover: isDarkMode ? "hover:text-white hover:bg-[#1A263D]" : "hover:text-gray-900 hover:bg-gray-100",
   };
 
   return (
+    // حاوية الصفحة بالكامل (بتتأثر بالوضع الليلي والنهاري بنعومة)
     <div 
       dir="rtl" 
-      className="min-h-screen bg-[#050810] text-gray-100 font-sans flex antialiased selection:bg-[#C8D749]/30 relative overflow-x-hidden"
+      className={`min-h-screen p-4 md:p-6 transition-colors duration-500 ease-in-out ${theme.bg} font-sans antialiased`}
     >
       
-      {/* 🍔 زرار الهامبرجر (الثلاث شرايط) لفتح السايد بار */}
-      <button
-        onClick={() => setIsSidebarOpen(true)}
-        className="absolute top-6 right-6 z-30 w-12 h-12 rounded-xl bg-[#0B1221] border border-[#1A263D] flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#1A263D] shadow-lg transition-colors"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </button>
-
-      {/* 🌑 الخلفية المظلمة (Overlay) اللي بتظهر ورا السايد بار عشان تقفله لما تدوس بره */}
-      {isSidebarOpen && (
-        <div 
-          onClick={() => setIsSidebarOpen(false)}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 cursor-pointer"
-        />
-      )}
-
-      {/* 🧭 السايد بار (Drawer) المخفي اللي بيسحب من اليمين */}
-      <aside 
-        className={`fixed top-0 right-0 h-screen w-80 bg-[#0B1221] border-l border-[#1A263D] flex flex-col justify-between p-6 z-50 transform transition-transform duration-300 ease-in-out shadow-[-20px_0_50px_rgba(0,0,0,0.5)] overflow-y-auto custom-scrollbar ${
-          isSidebarOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="space-y-8">
+      {/* 🚀 الهيدر العلوي */}
+      <div className="w-full flex justify-between items-center">
+        
+        {/* 🟢 القسم الأيمن: (الهامبرجر + البروفايل + اسم المستر) */}
+        <div className="flex items-center gap-3">
           
-          {/* لوجو الهوية + زرار الإغلاق */}
-          <div className="flex items-center justify-between border-b border-[#1A263D] pb-5">
-            <div className="flex items-center gap-3" dir="ltr">
-              <div className="w-10 h-10 rounded-xl bg-[#C8D749]/10 border border-[#C8D749]/20 flex items-center justify-center text-xl">
-                🧬
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-black text-white tracking-wide">Tammam</span>
-                <span className="text-[9px] text-[#C8D749] font-bold tracking-widest uppercase mt-0.5">Biology Society</span>
-              </div>
+          {/* 1. زرار الهامبرجر ☰ (أقصى اليمين) */}
+          <button 
+            className={`w-11 h-11 rounded-xl border ${theme.headerBg} ${theme.borderColor} flex items-center justify-center text-gray-500 ${theme.iconHover} transition-all shadow-sm`}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+
+          {/* 2. أيقونة بروفايل الطالب */}
+          <div className={`w-11 h-11 rounded-full border-2 border-[#C8D749] p-[2px] cursor-pointer hover:scale-105 transition-transform`}>
+            <div className="w-full h-full bg-gray-800 rounded-full flex items-center justify-center text-xl overflow-hidden">
+              👨‍🎓
             </div>
-            
-            {/* زرار الإغلاق X */}
-            <button 
-              onClick={() => setIsSidebarOpen(false)}
-              className="w-8 h-8 rounded-lg bg-[#050810] border border-[#1A263D] text-gray-400 hover:text-white flex items-center justify-center transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
           </div>
 
-          {/* القائمة والروابط الذكية */}
-          <nav className="space-y-2">
-            {sidebarItems.map((item) => {
-              const isActive = pathname === item.path;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    router.push(item.path);
-                    setIsSidebarOpen(false); // يقفل السايد بار تلقائي بعد ما يختار صفحة
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-xs font-bold transition-all duration-200 border ${
-                    isActive
-                      ? "bg-[#C8D749] text-[#070B14] border-[#C8D749] shadow-sm font-black"
-                      : "text-gray-400 border-transparent hover:bg-[#1A263D] hover:text-white"
-                  }`}
-                >
-                  <span className="text-base">{item.icon}</span>
-                  <span className="tracking-wide">{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+          {/* 3. اسم المستر وأيقونة الأحياء */}
+          <div className="flex flex-col justify-center mr-1">
+            <div className="flex items-center gap-1.5">
+              <h1 className={`text-lg font-black tracking-wide ${theme.textMain}`}>
+                د. أحمد تمام
+              </h1>
+              <span className="text-xl drop-shadow-md">🧬</span>
+            </div>
+            <p className={`text-[10px] font-bold tracking-widest ${theme.textSub}`}>
+              BIOLOGY SOCIETY
+            </p>
+          </div>
+
         </div>
 
-        {/* زر تسجيل الخروج في أسفل السايد بار */}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-4 px-4 py-3.5 mt-6 rounded-xl text-xs font-bold text-red-400 bg-[#050810] border border-[#1A263D] hover:bg-red-500/10 hover:border-red-500/20 transition-colors"
-        >
-          <span className="text-base">🚪</span>
-          <span className="tracking-wide">تسجيل الخروج من الحساب</span>
-        </button>
-      </aside>
-
-      {/* 🖥️ المحتوى التفاعلي الديناميكي */}
-      <div className="flex-1 flex flex-col min-h-screen relative overflow-y-auto">
-        <main className="relative z-10 flex-1 font-sans tracking-wide leading-relaxed">
-          {/* هنسيب المساحة العلوية فاضية شوية عشان زرار الهامبرجر ميغطيش على محتوى الصفحات */}
-          <div className="pt-24 md:pt-10">
-            {children}
+        {/* 🟣 القسم الأيسر: شريط الأدوات المدمج (Pill Shape) */}
+        <div className={`flex items-center rounded-full border ${theme.headerBg} ${theme.borderColor} shadow-sm h-11`} dir="rtl">
+          
+          {/* 1. الرصيد والمحفظة */}
+          <div className={`flex items-center gap-2 pl-4 pr-5 h-full border-l ${theme.borderColor}`}>
+            <span className={`text-sm font-black tracking-wide ${theme.textMain}`}>
+              0.00 <span className={`text-[10px] ${theme.textSub}`}>ج.م</span>
+            </span>
+            <div className="w-6 h-6 rounded-full bg-[#C8D749]/10 text-[#C8D749] flex items-center justify-center text-xs">
+              💰
+            </div>
           </div>
-        </main>
+
+          {/* 2. الإشعارات */}
+          <button className={`w-12 h-full flex items-center justify-center border-l ${theme.borderColor} text-gray-400 ${theme.iconHover} transition-colors relative`}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <span className="absolute top-2.5 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-transparent"></span>
+          </button>
+
+          {/* 3. زر تبديل الوضع الليلي والنهاري (بيغير الـ State) */}
+          <button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className={`w-12 h-full rounded-l-full flex items-center justify-center text-gray-400 ${theme.iconHover} transition-colors`}
+          >
+            {isDarkMode ? (
+              // أيقونة الشمس (تظهر في الوضع الليلي عشان تقلب للنهاري)
+              <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+            ) : (
+              // أيقونة القمر (تظهر في الوضع النهاري عشان تقلب لليلي)
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+              </svg>
+            )}
+          </button>
+
+        </div>
       </div>
 
     </div>
