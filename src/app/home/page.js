@@ -10,16 +10,15 @@ export default function HomeLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // 🎨 الألوان الاحترافية (بدون بهرجة)
+  // 🎨 ألوان المنصة المستوحاة من الصورة بالملي
   const theme = {
-    bg: isDarkMode ? "bg-[#0b1121]" : "bg-[#f8fafc]",
-    headerBg: isDarkMode ? "bg-[#111827]" : "bg-white",
-    borderColor: isDarkMode ? "border-gray-800" : "border-gray-200",
-    textMain: isDarkMode ? "text-gray-100" : "text-gray-900",
-    textSub: isDarkMode ? "text-gray-400" : "text-gray-500",
+    bg: isDarkMode ? "bg-[#0A111E]" : "bg-[#F8FAFC]",
+    headerBg: isDarkMode ? "bg-[#0A111E]" : "bg-white",
+    borderColor: isDarkMode ? "border-[#1E293B]" : "border-gray-200",
+    textMain: isDarkMode ? "text-white" : "text-gray-900",
     iconColor: isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-900",
-    walletBg: isDarkMode ? "bg-gray-100 text-gray-900" : "bg-gray-100 text-gray-900",
-    walletIconBg: isDarkMode ? "bg-gray-800 text-white" : "bg-gray-800 text-white",
+    walletBg: "bg-white text-gray-900", // المحفظة دايماً بيضا زي الصورة
+    walletIconBg: "bg-[#1E293B] text-white", // الأيقونة جوه المحفظة دايماً غامقة
   };
 
   const sidebarItems = [
@@ -33,66 +32,66 @@ export default function HomeLayout({ children }) {
     <div dir="rtl" className={`min-h-screen transition-colors duration-300 ${theme.bg} font-sans antialiased`}>
       
       {/* ========================================= */}
-      {/* 🚀 الهيدر الاحترافي (بدون إيموجيز) */}
+      {/* 🚀 الهيدر الاحترافي (نسخة طبق الأصل من الصورة) */}
       {/* ========================================= */}
-      <header className={`w-full h-20 flex items-center justify-between px-6 lg:px-10 ${theme.headerBg} border-b ${theme.borderColor} sticky top-0 z-30`}>
+      <header className={`w-full h-[72px] flex items-center justify-between px-6 lg:px-8 ${theme.headerBg} border-b ${theme.borderColor} sticky top-0 z-30`}>
         
-        {/* 🟢 اليمين: القائمة، البروفايل، الإشعارات، الرصيد، البحث */}
-        <div className="flex items-center gap-4 lg:gap-6">
+        {/* 🟢 القسم الأيمن (توزيع العناصر من اليمين لليسار زي الصورة) */}
+        <div className="flex items-center gap-5 md:gap-6">
           
-          {/* زر الهامبرجر */}
-          <button onClick={() => setIsSidebarOpen(true)} className={`p-2 ${theme.iconColor} transition-colors`}>
+          {/* 1. زرار الهامبرجر ☰ */}
+          <button onClick={() => setIsSidebarOpen(true)} className={`${theme.iconColor} transition-colors`}>
             <MenuIcon />
           </button>
 
-          {/* البروفايل (SVG بدل الإيموجي) */}
-          <button className={`w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 overflow-hidden border border-gray-300`}>
+          {/* 2. البروفايل */}
+          <button className={`w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 overflow-hidden`}>
             <UserSolidIcon />
           </button>
 
-          {/* الإشعارات */}
-          <button className={`p-2 relative ${theme.iconColor} transition-colors hidden sm:block`}>
+          {/* 3. الإشعارات (مع النقطة الحمراء) */}
+          <button className={`relative ${theme.iconColor} transition-colors`}>
             <BellIcon />
-            <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
+            <span className="absolute top-0.5 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          {/* الرصيد (تصميم الكبسولة الاحترافي) */}
-          <div className={`hidden md:flex items-center rounded-full ${theme.walletBg} h-10 pl-1 pr-4 shadow-sm`}>
-            <span className="text-[14px] font-bold mr-2 ml-3 tracking-wide">
-              0 <span className="text-[11px] font-semibold text-gray-600">جنيه</span>
-            </span>
-            <div className={`w-8 h-8 rounded-full ${theme.walletIconBg} flex items-center justify-center`}>
+          {/* 4. الرصيد والمحفظة (الكبسولة البيضاء) */}
+          <div className={`hidden md:flex items-center rounded-full ${theme.walletBg} h-9 pl-1 pr-4 shadow-sm`}>
+            <div className={`w-7 h-7 rounded-full ${theme.walletIconBg} flex items-center justify-center ml-2`}>
               <WalletIconSmall />
             </div>
+            <span className="text-[13px] font-black tracking-wide">
+              0 <span className="text-[11px] font-bold text-gray-600">جنيه</span>
+            </span>
           </div>
 
-          {/* البحث */}
-          <button className={`p-2 ${theme.iconColor} transition-colors hidden sm:block`}>
+          {/* 5. زر البحث */}
+          <button className={`${theme.iconColor} transition-colors hidden sm:block`}>
             <SearchIcon />
           </button>
 
         </div>
 
-        {/* 🔵 اليسار: مفتاح الإضاءة + اللوجو */}
+        {/* 🔵 القسم الأيسر (اللوجو وزرار الإضاءة) */}
         <div className="flex items-center gap-6" dir="ltr">
           
-          {/* Toggle Button (الليل/النهار) */}
+          {/* Toggle Button (الليل/النهار زي الصورة بالظبط) */}
           <button 
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`w-20 h-10 rounded-full flex items-center px-1 transition-colors duration-300 ${isDarkMode ? "bg-gray-700" : "bg-gray-300"}`}
+            className={`w-14 h-8 rounded-full flex items-center px-1 transition-colors duration-300 ${isDarkMode ? "bg-[#334155]" : "bg-gray-300"}`}
           >
-            <div className={`w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center transition-transform duration-300 ${isDarkMode ? "translate-x-[40px]" : "translate-x-0"}`}>
-              {isDarkMode ? <MoonIcon textClass="text-gray-800" /> : <SunIcon textClass="text-amber-500" />}
+            <div className={`w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center transition-transform duration-300 ${isDarkMode ? "translate-x-6" : "translate-x-0"}`}>
+              {isDarkMode ? <MoonIcon /> : <SunIcon />}
             </div>
           </button>
 
-          {/* اللوجو (نص واضح واحترافي) */}
-          <div className="flex flex-col items-start ml-2">
-            <h1 className={`text-2xl font-black ${theme.textMain} tracking-tight`}>
+          {/* اللوجو (Tammam BIOLOGY) */}
+          <div className="flex flex-col items-start leading-tight mt-1">
+            <h1 className={`text-xl font-black ${theme.textMain} tracking-wide`}>
               Tammam
             </h1>
-            <span className="text-[#C8D749] text-[10px] font-bold tracking-[0.1em] uppercase">
-              Biology
+            <span className="text-[#C8D749] text-[9px] font-black tracking-[0.15em] uppercase">
+              BIOLOGY
             </span>
           </div>
 
@@ -105,7 +104,7 @@ export default function HomeLayout({ children }) {
       {isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(false)}
-          className="fixed inset-0 bg-black/60 z-40 transition-opacity"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
         />
       )}
 
@@ -114,17 +113,13 @@ export default function HomeLayout({ children }) {
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* هيدر السايد بار */}
         <div className={`flex items-center justify-between border-b ${theme.borderColor} pb-6 mb-6`}>
-          <div className="flex flex-col">
-            <h2 className={`text-xl font-black ${theme.textMain}`}>القائمة الرئيسية</h2>
-          </div>
-          <button onClick={() => setIsSidebarOpen(false)} className={`p-2 ${theme.iconColor}`}>
+          <h2 className={`text-xl font-black ${theme.textMain}`}>القائمة الرئيسية</h2>
+          <button onClick={() => setIsSidebarOpen(false)} className={`${theme.iconColor}`}>
             <CloseIcon />
           </button>
         </div>
 
-        {/* الروابط */}
         <nav className="flex flex-col gap-2 flex-1">
           {sidebarItems.map((item) => {
             const isActive = pathname === item.path;
@@ -137,8 +132,8 @@ export default function HomeLayout({ children }) {
                 }}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-colors ${
                   isActive
-                    ? "bg-[#C8D749] text-gray-900"
-                    : `${theme.textSub} hover:${theme.textMain} hover:bg-gray-800/50`
+                    ? "bg-[#C8D749] text-[#0A111E]"
+                    : `text-gray-400 hover:${theme.textMain} hover:bg-white/5`
                 }`}
               >
                 <div className="w-5 h-5 flex items-center justify-center">
@@ -167,13 +162,13 @@ export default function HomeLayout({ children }) {
 // ==========================================
 
 const MenuIcon = () => (
-  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
   </svg>
 );
 
 const UserSolidIcon = () => (
-  <svg className="w-6 h-6 mt-1" viewBox="0 0 24 24" fill="currentColor">
+  <svg className="w-5 h-5 mt-1" viewBox="0 0 24 24" fill="currentColor">
     <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
   </svg>
 );
@@ -185,7 +180,7 @@ const BellIcon = () => (
 );
 
 const SearchIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
   </svg>
 );
@@ -196,20 +191,20 @@ const WalletIconSmall = () => (
   </svg>
 );
 
-const SunIcon = ({ textClass }) => (
-  <svg className={`w-5 h-5 ${textClass}`} fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+const SunIcon = () => (
+  <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
   </svg>
 );
 
-const MoonIcon = ({ textClass }) => (
-  <svg className={`w-5 h-5 ${textClass}`} fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+const MoonIcon = () => (
+  <svg className="w-4 h-4 text-[#0A111E]" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
   </svg>
 );
 
 const CloseIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
