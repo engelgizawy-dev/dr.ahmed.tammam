@@ -1,91 +1,185 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
-export default function CoursesHome() {
+export default function HomeLayout({ children }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // 🎛️ States
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State للتحكم في السايد بار
-  const studentName = "عبدالعزيز خالد"; 
+
+  // 🎨 متغيرات الألوان التفاعلية (بتتغير فوراً لما تدوس على زرار الليل/الصبح)
+  const theme = {
+    bg: isDarkMode ? "bg-[#030712]" : "bg-[#F3F5F9]", // خلفية المنصة
+    cardBg: isDarkMode ? "bg-[#0B1329]" : "bg-white", // خلفية الكروت والسايد بار
+    borderColor: isDarkMode ? "border-white/5" : "border-gray-200",
+    textMain: isDarkMode ? "text-white" : "text-gray-900",
+    textSub: isDarkMode ? "text-gray-400" : "text-gray-500",
+    iconHover: isDarkMode ? "hover:text-white hover:bg-white/5" : "hover:text-gray-900 hover:bg-gray-100",
+    shadow: isDarkMode ? "shadow-[0_4px_20px_rgba(0,0,0,0.3)]" : "shadow-[0_4px_20px_rgba(0,0,0,0.05)]",
+  };
+
+  // 📋 مصفوفة السايد بار
+  const sidebarItems = [
+    { id: "home", label: "الصفحة الرئيسية", icon: "📚", path: "/home" },
+    { id: "profile", label: "الملف الشخصي", icon: "👤", path: "/dashboard" },
+    { id: "homework-results", label: "نتائج الواجبات", icon: "📝", path: "/homework-results" },
+    { id: "exam-results", label: "نتائج الامتحانات", icon: "📊", path: "/exam-results" },
+    { id: "academic-support", label: "الدعم العلمي", icon: "🧪", path: "/academic-support" },
+    { id: "tech-support", label: "الدعم الفني", icon: "🛠️", path: "/tech-support" },
+  ];
 
   return (
-    <div className="p-6 md:p-10 space-y-10 min-h-screen bg-[#050810] font-sans antialiased" dir="rtl">
-      
-      {/* 🚀 الجزء الأول: الهيدر العلوي (تصميم انسيابي حديث) */}
-      <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div 
+      dir="rtl" 
+      className={`min-h-screen transition-colors duration-500 ease-in-out ${theme.bg} font-sans antialiased relative overflow-x-hidden`}
+    >
+      {/* ========================================= */}
+      {/* 🚀 الهيدر العلوي الجديد (كبير، فخم، وموزع صح) */}
+      {/* ========================================= */}
+      <header className="w-full flex items-center justify-between p-6 md:px-10 md:py-8 relative z-20">
         
-        {/* 1. البروفايل (زرار السايد بار) + الترحيب */}
-        <div className="flex items-center gap-4">
-          
-          {/* زر البروفايل اللي بيفتح السايد بار */}
+        {/* 🟢 القسم الأيمن: زرار الهامبرجر + البروفايل */}
+        <div className="flex items-center gap-5 flex-shrink-0">
+          {/* زرار الهامبرجر (بيفتح السايد بار) - كبرناه جداً */}
           <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="group relative w-14 h-14 rounded-full bg-gradient-to-tr from-[#C8D749] to-emerald-600 p-[2px] cursor-pointer hover:scale-105 transition-transform duration-200 shadow-lg"
+            onClick={() => setIsSidebarOpen(true)}
+            className={`w-14 h-14 rounded-2xl border ${theme.cardBg} ${theme.borderColor} flex items-center justify-center text-gray-500 ${theme.iconHover} transition-all shadow-sm`}
           >
-            <div className="w-full h-full bg-[#050810] rounded-full flex items-center justify-center text-2xl group-hover:bg-opacity-90 transition-all">
-              👨‍⚕️
-            </div>
-            {/* أيقونة همبرجر صغيرة توضح إنه بيفتح قايمة */}
-            <div className="absolute -bottom-1 -left-1 bg-[#050810] border border-[#1A263D] rounded-full p-1.5 shadow-sm">
-              <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 6h16M4 12h16M4 18h16"></path>
-              </svg>
-            </div>
-          </button>
-
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-black text-white tracking-wide">
-              مرحباً، <span className="text-[#C8D749]">{studentName}</span> 👋
-            </h1>
-            <div className="flex items-center gap-2 mt-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <p className="text-gray-400 text-xs font-bold">ثانوية عامة 2026 • مستعد للتفوق</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. شريط الأدوات المدمج (Pill Shape) */}
-        <div className="flex items-center bg-[#0B1221] rounded-full p-1.5 border border-[#1A263D] shadow-sm" dir="ltr">
-          
-          {/* المحفظة */}
-          <div className="flex items-center gap-2.5 pl-5 pr-4 py-2 border-r border-[#1A263D]">
-            <span className="text-sm text-white font-black tracking-wide">0.00 <span className="text-[10px] text-gray-500">ج.م</span></span>
-            <div className="w-7 h-7 rounded-full bg-[#C8D749]/10 text-[#C8D749] flex items-center justify-center text-sm">💰</div>
-          </div>
-
-          {/* الإشعارات */}
-          <button className="px-4 py-2 text-gray-400 hover:text-white transition-colors relative">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
-            <span className="absolute top-1.5 right-4 w-2 h-2 bg-red-500 rounded-full border-2 border-[#0B1221]"></span>
           </button>
 
-          {/* الإضاءة */}
-          <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="px-4 py-2 text-gray-400 hover:text-[#C8D749] transition-colors border-l border-[#1A263D]"
-          >
-            {isDarkMode ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            )}
-          </button>
-
+          {/* أيقونة البروفايل */}
+          <div className="w-14 h-14 rounded-full border-[3px] border-[#C8D749] p-[2px] cursor-pointer hover:scale-105 transition-transform shadow-lg relative">
+            <div className={`w-full h-full ${isDarkMode ? 'bg-[#030712]' : 'bg-gray-100'} rounded-full flex items-center justify-center text-2xl overflow-hidden`}>
+              👨‍🎓
+            </div>
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+          </div>
         </div>
-      </div>
 
-      {/* منطقة إثبات فكرة السايد بار (للتوضيح فقط) */}
+        {/* 🟣 القسم الأوسط: شريط الأدوات (Pill Shape) متسنتر في النص */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <div className={`flex items-center rounded-full border ${theme.cardBg} ${theme.borderColor} ${theme.shadow} h-14`} dir="rtl">
+            {/* الرصيد */}
+            <div className={`flex items-center gap-3 pl-6 pr-6 h-full border-l ${theme.borderColor}`}>
+              <span className={`text-base font-black tracking-wide ${theme.textMain}`}>
+                0.00 <span className={`text-[11px] ${theme.textSub}`}>ج.م</span>
+              </span>
+              <div className="w-8 h-8 rounded-full bg-[#C8D749]/15 text-[#C8D749] flex items-center justify-center text-sm shadow-inner">
+                💰
+              </div>
+            </div>
+
+            {/* الإشعارات */}
+            <button className={`w-16 h-full flex items-center justify-center border-l ${theme.borderColor} text-gray-400 ${theme.iconHover} transition-colors relative`}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+              <span className="absolute top-3.5 right-4 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-transparent animate-pulse"></span>
+            </button>
+
+            {/* زر الوضع الليلي/النهاري */}
+            <button 
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`w-16 h-full rounded-l-full flex items-center justify-center text-gray-400 ${theme.iconHover} transition-colors`}
+            >
+              {isDarkMode ? (
+                <svg className="w-6 h-6 text-amber-400 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+              ) : (
+                <svg className="w-6 h-6 text-indigo-600 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* 🔵 القسم الأيسر: اسم المستر بالإنجليزي بخط رقعه/فخم كبير */}
+        <div className="flex-shrink-0 mr-auto text-left pl-2 flex flex-col justify-center items-start" dir="ltr">
+          <h1 className={`text-4xl md:text-5xl font-black italic font-serif tracking-tighter ${theme.textMain} drop-shadow-sm`}>
+            Dr. Tammam
+          </h1>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[#C8D749] text-xs font-bold tracking-[0.2em] uppercase">Biology Society</span>
+            <span className="text-sm">🧬</span>
+          </div>
+        </div>
+      </header>
+
+      {/* ========================================= */}
+      {/* 🌑 السايد بار (Drawer) الديناميكي المتوافق مع الليل/النهار */}
+      {/* ========================================= */}
+      
+      {/* الـ Overlay لغلق السايد بار */}
       {isSidebarOpen && (
-        <div className="w-full p-4 bg-[#C8D749]/10 border border-[#C8D749]/30 text-[#C8D749] rounded-xl text-sm font-bold text-center">
-          ✅ السايد بار مفتوح دلوقتي! (هنبني محتواه بعدين)
-        </div>
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+        />
       )}
 
-      {/* منطقة الكروت */}
-      <div className="w-full h-48 border border-dashed border-[#1A263D] rounded-3xl flex items-center justify-center text-gray-600 font-bold text-sm">
-        مكان كروت الكورسات
-      </div>
+      {/* نافذة السايد بار */}
+      <aside 
+        className={`fixed top-0 right-0 h-screen w-[320px] ${theme.cardBg} border-l ${theme.borderColor} flex flex-col justify-between p-6 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl ${
+          isSidebarOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="space-y-8">
+          {/* لوجو السايد بار وزرار الإغلاق */}
+          <div className={`flex items-center justify-between border-b ${theme.borderColor} pb-6`}>
+            <div className="flex items-center gap-3" dir="ltr">
+              <div className="w-12 h-12 rounded-xl bg-[#C8D749]/10 border border-[#C8D749]/20 flex items-center justify-center text-2xl">
+                🧬
+              </div>
+              <div className="flex flex-col">
+                <span className={`text-2xl font-black ${theme.textMain} tracking-wide font-serif italic`}>Tammam</span>
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className={`w-10 h-10 rounded-xl border ${theme.borderColor} ${theme.textSub} ${theme.iconHover} flex items-center justify-center transition-colors`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          {/* روابط القائمة */}
+          <nav className="space-y-2.5">
+            {sidebarItems.map((item) => {
+              const isActive = pathname === item.path;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    router.push(item.path);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl text-sm transition-all duration-200 border ${
+                    isActive
+                      ? "bg-[#C8D749] text-[#030712] border-[#C8D749] font-black shadow-md scale-[1.02]"
+                      : `border-transparent ${theme.textSub} ${theme.iconHover} font-bold`
+                  }`}
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="tracking-wide">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </aside>
+
+      {/* ========================================= */}
+      {/* 🖥️ منطقة المحتوى */}
+      {/* ========================================= */}
+      <main className="relative z-10 px-6 md:px-10 pb-10 flex-1 font-sans tracking-wide leading-relaxed">
+        {children}
+      </main>
 
     </div>
   );
